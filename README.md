@@ -157,6 +157,11 @@ basic-http-server static
 
 Then open `http://localhost:4000` in your browser.
 
+### GitHub Pages
+
+This repository includes a `GitHub Pages` workflow that builds the WebAssembly
+version and deploys the generated `static/` directory to GitHub Pages.
+
 ## Dependencies
 
 The key external dependency of Zemeroth is [macroquad]/[miniquad].
