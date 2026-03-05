@@ -23,15 +23,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
           target: wasm32-unknown-unknown
-          profile: minimal
-          override: true
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
 
       - name: Install resvg
-        run: cargo install resvg
+        run: |
+          if ! command -v resvg >/dev/null 2>&1; then
+            cargo install resvg
+          fi
 
       - name: Export assets
         run: ./utils/assets_export.sh
