@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use heck::TitleCase;
-use mq::{color::Color, math::Vec2};
+use mq::{color::Color, input::KeyCode, math::Vec2};
 use ui::{self, Drawable, Gui, Widget};
 
 use crate::{
@@ -280,5 +280,12 @@ impl Screen for AgentInfo {
     fn move_mouse(&mut self, pos: Vec2) -> ZResult {
         self.gui.move_mouse(pos);
         Ok(())
+    }
+
+    fn handle_key_press(&mut self, key: KeyCode) -> ZResult<StackCommand> {
+        match key {
+            KeyCode::Escape | KeyCode::B => Ok(StackCommand::Pop),
+            _ => Ok(StackCommand::None),
+        }
     }
 }

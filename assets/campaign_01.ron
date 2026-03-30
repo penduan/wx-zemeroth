@@ -19,7 +19,7 @@ Plan(
         ),
         (
             scenario: (
-                rocky_tiles_count: 3,
+                rocky_tiles_count: 4,
                 randomized_objects: [
                     (owner: None, typename: "boulder", line: None, count: 1),
                     (owner: Some((1)), typename: "imp", line: Some(Front), count: 3),

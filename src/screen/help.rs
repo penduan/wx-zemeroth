@@ -124,7 +124,7 @@ impl Screen for Help {
 
     fn handle_key_press(&mut self, key: KeyCode) -> ZResult<StackCommand> {
         match key {
-            KeyCode::Escape | KeyCode::H => Ok(StackCommand::Pop),
+            KeyCode::Escape => Ok(StackCommand::Pop),
             _ => Ok(StackCommand::None),
         }
     }
