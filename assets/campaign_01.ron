@@ -2,6 +2,7 @@ Plan(
     initial_agents: [
         "swordsman",
         "spearman",
+        "alchemist",
     ],
     nodes: [
         (
@@ -13,21 +14,22 @@ Plan(
             ),
             award: (
                 recruits: ["hammerman", "alchemist"],
-                renown: 17,
+                renown: 20,
             ),
         ),
         (
             scenario: (
-                rocky_tiles_count: 5,
+                rocky_tiles_count: 4,
                 randomized_objects: [
                     (owner: None, typename: "boulder", line: None, count: 1),
                     (owner: Some((1)), typename: "imp", line: Some(Front), count: 3),
-                    (owner: Some((1)), typename: "imp_bomber", line: Some(Middle), count: 2),
+                    (owner: Some((1)), typename: "toxic_imp", line: Some(Middle), count: 1),
+                    (owner: Some((1)), typename: "imp_bomber", line: Some(Middle), count: 1),
                 ],
             ),
             award: (
                 recruits: ["spearman", "alchemist"],
-                renown: 18,
+                renown: 22,
             ),
         ),
         (
@@ -44,7 +46,7 @@ Plan(
             ),
             award: (
                 recruits: ["swordsman", "alchemist"],
-                renown: 20,
+                renown: 24,
             ),
         ),
         (
@@ -62,7 +64,7 @@ Plan(
             ),
             award: (
                 recruits: ["spearman", "hammerman"],
-                renown: 21,
+                renown: 25,
             ),
         ),
         (
@@ -80,7 +82,7 @@ Plan(
             ),
             award: (
                 recruits: ["swordsman", "spearman", "alchemist"],
-                renown: 22,
+                renown: 27,
             ),
         ),
         (

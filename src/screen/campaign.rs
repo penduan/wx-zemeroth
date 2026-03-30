@@ -5,7 +5,7 @@ use std::{
 
 use heck::TitleCase;
 use log::info;
-use mq::{math::Vec2, text::Font};
+use mq::{input::KeyCode, math::Vec2, text::Font};
 use ui::{self, Drawable, Gui, Widget};
 
 use crate::{
@@ -361,5 +361,31 @@ impl Screen for Campaign {
     fn move_mouse(&mut self, pos: Vec2) -> ZResult {
         self.gui.move_mouse(pos);
         Ok(())
+    }
+
+    fn handle_key_press(&mut self, key: KeyCode) -> ZResult<StackCommand> {
+        match key {
+            KeyCode::Enter | KeyCode::S => {
+                // Start battle shortcut (only in preparing mode)
+                if self.state.mode() == Mode::PreparingForBattle {
+                    let screen = self.start_battle()?;
+                    return Ok(StackCommand::PushScreen(screen));
+                }
+            }
+            KeyCode::Escape => {
+                // Same as clicking the menu button
+                if self.state.mode() == Mode::PreparingForBattle {
+                    let (sender, receiver) = channel();
+                    self.receiver_exit_confirmation = Some(receiver);
+                    let screen =
+                        screen::Confirm::from_line("Abandon the campaign?", sender)?;
+                    return Ok(StackCommand::PushPopup(Box::new(screen)));
+                } else {
+                    return Ok(StackCommand::Pop);
+                }
+            }
+            _ => {}
+        }
+        Ok(StackCommand::None)
     }
 }

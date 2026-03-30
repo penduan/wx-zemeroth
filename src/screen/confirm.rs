@@ -3,7 +3,7 @@ use std::{
     time::Duration,
 };
 
-use mq::math::Vec2;
+use mq::{input::KeyCode, math::Vec2};
 use ui::{self, Gui, Widget};
 
 use crate::{
@@ -108,5 +108,23 @@ impl Screen for Confirm {
     fn move_mouse(&mut self, pos: Vec2) -> ZResult {
         self.gui.move_mouse(pos);
         Ok(())
+    }
+
+    fn handle_key_press(&mut self, key: KeyCode) -> ZResult<StackCommand> {
+        match key {
+            KeyCode::Enter | KeyCode::Y => {
+                self.sender
+                    .send(Message::Yes)
+                    .expect("Can't report back the result");
+                Ok(StackCommand::Pop)
+            }
+            KeyCode::Escape | KeyCode::N => {
+                self.sender
+                    .send(Message::No)
+                    .expect("Can't report back the result");
+                Ok(StackCommand::Pop)
+            }
+            _ => Ok(StackCommand::None),
+        }
     }
 }
