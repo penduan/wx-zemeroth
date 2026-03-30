@@ -19,6 +19,12 @@ use crate::core::{
     utils::{self, roll_dice},
 };
 
+/// Number of rounds that fire persists on the battlefield.
+const FIRE_ROUNDS: i32 = 2;
+
+/// Number of rounds that a poison cloud persists on the battlefield.
+const POISON_CLOUD_ROUNDS: i32 = 2;
+
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub enum ApplyPhase {
     Pre,
@@ -590,7 +596,7 @@ fn execute_end_turn(state: &mut State, cb: Cb, _: &command::EndTurn) {
 
 fn start_fire(state: &mut State, pos: PosHex) -> ExecuteContext {
     let vanish = component::PlannedAbility {
-        rounds: 2.into(), // TODO: Replace this magic number
+        rounds: FIRE_ROUNDS.into(),
         phase: Phase::from_player_id(state.player_id()),
         ability: Ability::Vanish,
     };
@@ -611,7 +617,7 @@ fn start_fire(state: &mut State, pos: PosHex) -> ExecuteContext {
 
 fn create_poison_cloud(state: &mut State, pos: PosHex) -> ExecuteContext {
     let vanish = component::PlannedAbility {
-        rounds: 2.into(), // TODO: Replace this magic number
+        rounds: POISON_CLOUD_ROUNDS.into(),
         phase: Phase::from_player_id(state.player_id()),
         ability: Ability::Vanish,
     };

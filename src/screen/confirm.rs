@@ -3,7 +3,7 @@ use std::{
     time::Duration,
 };
 
-use mq::math::Vec2;
+use mq::{input::KeyCode, math::Vec2};
 use ui::{self, Gui, Widget};
 
 use crate::{
@@ -77,7 +77,6 @@ impl Confirm {
     }
 }
 
-// TODO: handle Enter/ESC keys
 impl Screen for Confirm {
     fn update(&mut self, _dtime: Duration) -> ZResult<StackCommand> {
         Ok(StackCommand::None)
@@ -99,6 +98,21 @@ impl Screen for Confirm {
             }
             None => Ok(StackCommand::None),
         }
+    }
+
+    fn handle_key(&mut self, key: KeyCode) -> ZResult<StackCommand> {
+        let message = match key {
+            KeyCode::Enter | KeyCode::Y => Some(Message::Yes),
+            KeyCode::Escape | KeyCode::N => Some(Message::No),
+            _ => None,
+        };
+        if let Some(message) = message {
+            self.sender
+                .send(message)
+                .expect("Can't report back the result");
+            return Ok(StackCommand::Pop);
+        }
+        Ok(StackCommand::None)
     }
 
     fn resize(&mut self, aspect_ratio: f32) {

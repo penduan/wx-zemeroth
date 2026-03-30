@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    ops::{Add, AddAssign, Sub, SubAssign},
+};
 
 use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
@@ -24,7 +27,33 @@ pub enum Mode {
 #[serde(transparent)]
 pub struct Renown(pub i32);
 
-// TODO: impl `Add` and `Sub` traits for `Renown`.
+impl Add for Renown {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self {
+        Renown(self.0 + rhs.0)
+    }
+}
+
+impl AddAssign for Renown {
+    fn add_assign(&mut self, rhs: Self) {
+        self.0 += rhs.0;
+    }
+}
+
+impl Sub for Renown {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self {
+        Renown(self.0 - rhs.0)
+    }
+}
+
+impl SubAssign for Renown {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.0 -= rhs.0;
+    }
+}
 
 /// An award that is given to the player after the successful battle.
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -135,7 +164,7 @@ impl State {
         assert!(utils::try_remove_item(&mut self.actions, &action));
         let cost = self.action_cost(&action);
         assert!(self.renown.0 >= cost.0);
-        self.renown.0 -= cost.0;
+        self.renown -= cost;
         match action {
             Action::Recruit { agent_type } => {
                 self.agents.push(agent_type);
@@ -194,7 +223,7 @@ impl State {
         } else {
             let i = self.current_scenario_index as usize;
             let award = &self.scenarios[i].award;
-            self.renown.0 += award.renown.0;
+            self.renown += award.renown;
             for recruit in &award.recruits {
                 let action = Action::Recruit {
                     agent_type: recruit.clone(),
@@ -238,9 +267,36 @@ mod tests {
             state::BattleResult,
             PlayerId,
         },
-        campaign::{Action, AgentInfo, Award, CampaignNode, Mode, Plan, State},
+        campaign::{Action, AgentInfo, Award, CampaignNode, Mode, Plan, Renown, State},
     };
 
+    #[test]
+    fn renown_add() {
+        assert_eq!(Renown(10) + Renown(5), Renown(15));
+        assert_eq!(Renown(0) + Renown(0), Renown(0));
+        assert_eq!(Renown(-3) + Renown(3), Renown(0));
+    }
+
+    #[test]
+    fn renown_sub() {
+        assert_eq!(Renown(10) - Renown(3), Renown(7));
+        assert_eq!(Renown(5) - Renown(10), Renown(-5));
+        assert_eq!(Renown(0) - Renown(0), Renown(0));
+    }
+
+    #[test]
+    fn renown_add_assign() {
+        let mut r = Renown(10);
+        r += Renown(5);
+        assert_eq!(r, Renown(15));
+    }
+
+    #[test]
+    fn renown_sub_assign() {
+        let mut r = Renown(10);
+        r -= Renown(3);
+        assert_eq!(r, Renown(7));
+    }
     type GroupTuple<'a> = (Option<PlayerId>, &'a str, Option<Line>, i32);
 
     impl<'a> From<GroupTuple<'a>> for ObjectsGroup {

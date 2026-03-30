@@ -35,6 +35,9 @@ impl MainState {
         if input::is_mouse_button_pressed(input::MouseButton::Left) {
             self.screens.click(pos)?;
         }
+        if let Some(key) = input::get_last_key_pressed() {
+            self.screens.handle_key(key)?;
+        }
         // Update the game state.
         let dtime = Duration::from_secs_f32(mq::time::get_frame_time());
         self.screens.update(dtime)?;

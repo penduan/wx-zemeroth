@@ -1,4 +1,7 @@
-use std::{fmt::Debug, iter::repeat};
+use std::{
+    fmt::{self, Debug},
+    iter::repeat,
+};
 
 use num::{Num, Signed};
 use serde::{Deserialize, Serialize};
@@ -24,6 +27,12 @@ pub struct PosHex<T: Debug + Copy = i32> {
 
     /// row
     pub r: T,
+}
+
+impl<T: Debug + Copy + fmt::Display> fmt::Display for PosHex<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {})", self.q, self.r)
+    }
 }
 
 pub fn hex_to_cube<N: Num + Copy + Debug + Signed>(hex: PosHex<N>) -> PosCube<N> {
@@ -275,7 +284,7 @@ impl Dir {
                 return dir;
             }
         }
-        panic!("impossible positions: {:?}, {:?}", from, to); // TODO: implement Display for PosHex
+        panic!("impossible positions: {}, {}", from, to);
     }
 
     pub fn get_neighbor_pos(pos: PosHex, dir: Self) -> PosHex {
@@ -313,12 +322,18 @@ impl Iterator for DirIter {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::map::{Distance, HexMap};
+    use crate::core::map::{Distance, HexMap, PosHex};
 
     #[test]
     fn test_map_height() {
         let map: HexMap<u8> = HexMap::new(Distance(3));
         let height = map.height();
         assert_eq!(height, Distance(7));
+    }
+
+    #[test]
+    fn test_pos_hex_display() {
+        let pos = PosHex { q: 3, r: -2 };
+        assert_eq!(format!("{}", pos), "(3, -2)");
     }
 }

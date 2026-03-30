@@ -47,6 +47,14 @@ fn make_gui() -> ZResult<ui::Gui<Message>> {
     let layout = utils::add_offsets_and_bg_big(layout)?;
     let anchor = ui::Anchor(ui::HAnchor::Middle, ui::VAnchor::Middle);
     gui.add(&ui::pack(layout), anchor);
+    // Version label in the bottom-right corner
+    let version_text = ui::Drawable::text(
+        &format!("v{}", env!("CARGO_PKG_VERSION")),
+        font,
+    );
+    let version_label = ui::pack(ui::Label::new(version_text, utils::line_heights().small)?);
+    let anchor = ui::Anchor(ui::HAnchor::Right, ui::VAnchor::Bottom);
+    gui.add(&version_label, anchor);
     Ok(gui)
 }
 
@@ -56,7 +64,6 @@ pub struct MainMenu {
     receiver_battle_result: Option<Receiver<Option<state::BattleResult>>>,
 }
 
-// TODO: add the game's version to one of the corners
 impl MainMenu {
     pub fn new() -> ZResult<Self> {
         let gui = make_gui()?;
