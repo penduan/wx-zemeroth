@@ -3,6 +3,7 @@ use std::{fmt::Debug, time::Duration};
 use log::info;
 use mq::{
     color::Color,
+    input::KeyCode,
     math::{Rect, Vec2},
 };
 
@@ -13,11 +14,12 @@ mod battle;
 mod campaign;
 mod confirm;
 mod general_info;
+mod help;
 mod main_menu;
 
 pub use self::{
     agent_info::AgentInfo, battle::Battle, campaign::Campaign, confirm::Confirm,
-    general_info::GeneralInfo, main_menu::MainMenu,
+    general_info::GeneralInfo, help::Help, main_menu::MainMenu,
 };
 
 pub const COLOR_SCREEN_BG: Color = Color::new(0.9, 0.9, 0.8, 1.0);
@@ -39,6 +41,10 @@ pub trait Screen: Debug {
 
     fn move_mouse(&mut self, _pos: Vec2) -> ZResult {
         Ok(())
+    }
+
+    fn handle_key_press(&mut self, _key: KeyCode) -> ZResult<StackCommand> {
+        Ok(StackCommand::None)
     }
 }
 
@@ -98,6 +104,11 @@ impl ScreenStack {
 
     pub fn move_mouse(&mut self, pos: Vec2) -> ZResult {
         self.screen_mut().top_mut().move_mouse(pos)
+    }
+
+    pub fn handle_key_press(&mut self, key: KeyCode) -> ZResult {
+        let command = self.screen_mut().top_mut().handle_key_press(key)?;
+        self.handle_command(command)
     }
 
     pub fn resize(&mut self, aspect_ratio: f32) -> ZResult {

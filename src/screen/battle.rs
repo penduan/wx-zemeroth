@@ -5,7 +5,7 @@ use std::{
 
 use heck::TitleCase;
 use log::{info, trace};
-use mq::{color::Color, math::Vec2};
+use mq::{color::Color, input::KeyCode, math::Vec2};
 
 use ui::{self, Gui, Widget};
 use zscene::{action, Action, Boxed};
@@ -323,6 +323,19 @@ fn build_panel_ability_description(
     Ok(layout)
 }
 
+fn build_panel_turn_counter(gui: &mut Gui<Message>, turn_number: u32) -> ZResult<ui::RcWidget> {
+    let font = assets::get().font;
+    let h = line_heights().normal;
+    let text = format!("Turn: {}", turn_number);
+    let drawable = ui::Drawable::text(&text, font);
+    let label = ui::Label::new(drawable, h)?;
+    let layout = ui::VLayout::from_widget(Box::new(label));
+    let anchor = ui::Anchor(ui::HAnchor::Middle, ui::VAnchor::Top);
+    let packed = ui::pack(layout);
+    gui.add(&packed, anchor);
+    Ok(packed)
+}
+
 fn make_gui() -> ZResult<ui::Gui<Message>> {
     let mut gui = ui::Gui::new();
     let h = line_heights().large;
@@ -355,6 +368,8 @@ pub struct Battle {
     panel_abilities: Option<ui::RcWidget>,
     panel_ability_description: Option<ui::RcWidget>,
     panel_end_turn: Option<ui::RcWidget>,
+    panel_turn_counter: Option<ui::RcWidget>,
+    turn_number: u32,
     sender: Sender<Option<BattleResult>>,
     confirmation_receiver_exit: Option<Receiver<screen::confirm::Message>>,
 }
@@ -378,6 +393,8 @@ impl Battle {
         actions.push(make_action_create_map(&state, &view)?);
         view.add_action(action::Sequence::new(actions).boxed());
         let panel_end_turn = Some(build_panel_end_turn(&mut gui)?);
+        let turn_number = 1u32;
+        let panel_turn_counter = Some(build_panel_turn_counter(&mut gui, turn_number)?);
         Ok(Self {
             gui,
             view,
@@ -392,6 +409,8 @@ impl Battle {
             panel_abilities: None,
             panel_end_turn,
             panel_ability_description: None,
+            panel_turn_counter,
+            turn_number,
             sender,
             confirmation_receiver_exit: None,
         })
@@ -406,6 +425,10 @@ impl Battle {
             self.do_ai(),
         ];
         self.add_actions(actions);
+        // Update turn counter
+        self.turn_number += 1;
+        utils::remove_widget(&mut self.gui, &mut self.panel_turn_counter)?;
+        self.panel_turn_counter = Some(build_panel_turn_counter(&mut self.gui, self.turn_number)?);
         Ok(())
     }
 
@@ -713,5 +736,27 @@ impl Screen for Battle {
         }
         self.gui.move_mouse(point);
         Ok(())
+    }
+
+    fn handle_key_press(&mut self, key: KeyCode) -> ZResult<StackCommand> {
+        match key {
+            KeyCode::Enter | KeyCode::Space => {
+                // End turn (only if not blocked and not in ability mode)
+                if self.block_timer.is_none()
+                    && !self.view.any_unfinished_actions()
+                    && self.mode == SelectionMode::Normal
+                {
+                    self.end_turn()?;
+                }
+            }
+            KeyCode::Escape => {
+                // Deselect agent or cancel ability mode
+                if self.selected_agent_id.is_some() {
+                    self.deselect()?;
+                }
+            }
+            _ => {}
+        }
+        Ok(StackCommand::None)
     }
 }
